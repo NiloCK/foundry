@@ -215,8 +215,8 @@ impl DebuggerContext<'_> {
         // currently being executed. This includes an offset and length.
         // This vector is in instruction pointer order, meaning the location of the instruction
         // minus `sum(push_bytes[..pc])`.
-        let offset = source_element.offset;
-        let len = source_element.length;
+        let offset = source_element.offset() as usize;
+        let len = source_element.length() as usize;
         let max = source_code.len();
 
         // Split source into before, relevant, and after chunks, split by line, for formatting.
@@ -357,7 +357,7 @@ impl DebuggerContext<'_> {
                 let source_element = source_map.get(ic)?;
                 // if the source element has an index, find the sourcemap for that index
                 source_element
-                    .index
+                    .index()
                     // if index matches current file_id, return current source code
                     .and_then(|index| {
                         (index == file_id).then(|| (source_element.clone(), source_code))
@@ -367,7 +367,7 @@ impl DebuggerContext<'_> {
                         self.debugger
                             .contracts_sources
                             .sources_by_id
-                            .get(&(source_element.index?))
+                            .get(&source_element.index()?)
                             .map(|source_code| (source_element.clone(), source_code.as_ref()))
                     })
             })
@@ -420,7 +420,7 @@ impl DebuggerContext<'_> {
 
         let params = OpcodeParam::of(step.instruction);
 
-        let text: Vec<Line> = stack
+        let text: Vec<Line<'_>> = stack
             .iter()
             .rev()
             .enumerate()
@@ -515,7 +515,7 @@ impl DebuggerContext<'_> {
         let height = area.height as usize;
         let end_line = self.draw_memory.current_buf_startline + height;
 
-        let text: Vec<Line> = buf
+        let text: Vec<Line<'_>> = buf
             .chunks(32)
             .enumerate()
             .skip(self.draw_memory.current_buf_startline)

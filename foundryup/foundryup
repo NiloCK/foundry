@@ -40,6 +40,12 @@ main() {
     esac; shift
   done
 
+  CARGO_BUILD_ARGS=(--release)
+
+  if [ -n "$FOUNDRYUP_JOBS" ]; then
+    CARGO_BUILD_ARGS+=(--jobs "$FOUNDRYUP_JOBS")
+  fi
+
   # Print the banner after successfully parsing args
   banner
 
